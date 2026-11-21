@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab 11 - User Validation</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 440px;
+            padding: 36px 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        }
+        .pill {
+            display: inline-block;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        .pill-green {
+            background: #ecfdf5;
+            color: #059669;
+        }
+        .pill-red {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 26px;
+            color: #0f172a;
+        }
+        .subtitle {
+            margin: 0 0 24px 0;
+            font-size: 14px;
+            color: #64748b;
+        }
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #4f46e5;
+        }
+        .btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background-color: #4338ca;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .btn:hover {
+            background-color: #3730a3;
+        }
+        .status-box {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+            padding: 22px 18px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .status-box.failed {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .status-box h2 {
+            margin: 8px 0;
+            font-size: 18px;
+        }
+        .status-box p {
+            margin: 0;
+            font-size: 13px;
+        }
+        .db-hint {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 18px;
+            font-size: 12px;
+            color: #475569;
+            text-align: left;
+        }
+        .db-hint strong {
+            color: #0f172a;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card" id="loginCard">
+        <span class="pill">EXPERIMENT 11</span>
+        <h1>User Validation</h1>
+        <p class="subtitle">Enter your login credentials to verify against database records.</p>
+
+        <form onsubmit="validateUser(event)">
+            <div class="form-group">
+                <label>Login Name</label>
+                <input type="text" id="loginName" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPass" placeholder="Enter password" required>
+            </div>
+            <button type="submit" class="btn">Login &rarr;</button>
+        </form>
+
+        <div class="db-hint">
+            <strong>Stored Database Records:</strong><br>
+            1. Name: <code>Likith Pydi</code> | Password: <code>12345</code><br>
+            2. Name: <code>admin</code> | Password: <code>admin123</code>
+        </div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+        <span class="pill" id="resultPill">STATUS</span>
+        <h1 id="resultTitle">Result</h1>
+
+        <div class="status-box" id="resultBox">
+            <div id="resultIcon" style="font-size: 26px; font-weight: bold;"></div>
+            <h2 id="resultHeading"></h2>
+            <p id="resultSub"></p>
+        </div>
+
+        <button class="btn" onclick="goBack()">Back to Login</button>
+    </div>
+
+    <script>
+        const databaseUsers = [
+            { username: "Likith Pydi", password: "12345" },
+            { username: "admin", password: "admin123" }
+        ];
+
+        function validateUser(event) {
+            event.preventDefault();
+
+            const enteredName = document.getElementById("loginName").value.trim();
+            const enteredPass = document.getElementById("loginPass").value;
+
+            const matchedUser = databaseUsers.find(
+                user => user.username === enteredName && user.password === enteredPass
+            );
+
+            const resultPill = document.getElementById("resultPill");
+            const resultTitle = document.getElementById("resultTitle");
+            const resultBox = document.getElementById("resultBox");
+            const resultIcon = document.getElementById("resultIcon");
+            const resultHeading = document.getElementById("resultHeading");
+            const resultSub = document.getElementById("resultSub");
+
+            if (matchedUser) {
+                resultPill.className = "pill pill-green";
+                resultPill.textContent = "AUTHENTICATED";
+                resultTitle.textContent = "Welcome, " + matchedUser.username + "!";
+                resultBox.className = "status-box";
+                resultIcon.innerHTML = "&#10003;";
+                resultHeading.textContent = "Login Successful";
+                resultSub.textContent = "Your credentials matched the database records.";
+            } else {
+                resultPill.className = "pill pill-red";
+                resultPill.textContent = "ACCESS DENIED";
+                resultTitle.textContent = "Login Failed";
+                resultBox.className = "status-box failed";
+                resultIcon.innerHTML = "&#10007;";
+                resultHeading.textContent = "Invalid Login Name or Password";
+                resultSub.textContent = "No matching record was found in the database.";
+            }
+
+            document.getElementById("loginCard").classList.add("hidden");
+            document.getElementById("resultCard").classList.remove("hidden");
+        }
+
+        function goBack() {
+            document.getElementById("loginName").value = "";
+            document.getElementById("loginPass").value = "";
+            document.getElementById("resultCard").classList.add("hidden");
+            document.getElementById("loginCard").classList.remove("hidden");
+        }
+    </script>
+</body>
+</html>
